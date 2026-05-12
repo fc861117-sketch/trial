@@ -13,7 +13,7 @@
         .page-watermark { 
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); 
             font-size: 60px; font-weight: 900; color: rgba(255, 255, 255, 0.05); 
-            z-index: -1; pointer-events: none; user-select: none; white-space: nowrap; letter-spacing: 5px; 
+            z-index: 9999; pointer-events: none; user-select: none; white-space: nowrap; letter-spacing: 5px; 
         }
 
         h1, h2, h3 { color: var(--accent); margin-top: 0; }
@@ -267,7 +267,7 @@
     </div>
 
     <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
-    <button id="btnExportImage" class="btn-main" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
+    <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
 </div>
 
 <div id="page-medic" class="page">
@@ -347,7 +347,7 @@
     // ==========================================
     // ⚠️ 記得替換下方網址 ⚠️
     // ==========================================
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbz4Lf6I0Na-mC940MtkDmD5CfA9WAoCYjy67sY3bQWSKycY45ki67NpHEMenDIr_ic/exec"; 
+    const GAS_URL = "請填寫您的GAS網址"; 
     // ==========================================
     
     const fetchHeaders = { 'Content-Type': 'text/plain;charset=utf-8' };
@@ -550,9 +550,12 @@
                     body: JSON.stringify({ action: 'uploadPhoto', projectName: currentProject, filename: `R_${idx}_${Date.now()}.jpg`, mimeType: 'image/jpeg', base64: base64Data }), redirect: 'follow'
                 }).then(r=>r.json()).then(res => {
                     if (res.error) { showToast("❌ 系統錯誤", "error"); return statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 系統錯誤</span>`; }
-                    document.getElementById(`r_${idx}_photo_url`).value = res.url; document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
+                    document.getElementById(`r_${idx}_photo_url`).value = res.url; document.getElementById(`r_${idx}_photo_id`).value = res.fileId; document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
+                    
+                    let rawImgUrl = `https://lh3.googleusercontent.com/d/${res.fileId}`;
+                    
                     statusEl.innerHTML = `
-                        <img src="${res.url}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                        <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
                         <div style="margin-top:5px;"><a href="${res.url}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
                     `;
                     saveBriefingToLocal(); showToast(`✅ 第${idx+1}面照片上傳成功！`, "success");
@@ -652,9 +655,15 @@
 
                 for(let i=0; i<4; i++) {
                     const pUrl = db[name].briefing[`r_${i}_photo_url`];
+                    const pId = db[name].briefing[`r_${i}_photo_id`];
                     if (pUrl && pUrl !== "") {
+                        let extractedId = pId;
+                        if (!extractedId && pUrl.includes('/d/')) { extractedId = pUrl.split('/d/')[1].split('/')[0]; }
+                        else if (!extractedId && pUrl.includes('id=')) { extractedId = pUrl.split('id=')[1].split('&')[0]; }
+                        let rawImgUrl = extractedId ? `https://lh3.googleusercontent.com/d/${extractedId}` : pUrl;
+                        
                         document.getElementById(`r_${i}_photo_status`).innerHTML = `
-                            <img src="${pUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                            <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
                             <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
                         `;
                     }
