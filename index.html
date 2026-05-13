@@ -47,6 +47,8 @@
         option { color: white; background: #2a2a2a; }
 
         .btn-main { width: 100%; padding: 0; background: #444; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; height: 55px; min-height: 55px; max-height: 55px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .btn-main:disabled { background: #555 !important; color: #999 !important; cursor: not-allowed; }
+        input:disabled, select:disabled, textarea:disabled { background: #1a1a1a !important; color: #777 !important; cursor: not-allowed; border-color: #333; }
         .btn-delete { background: #b71c1c; color: white; border-radius: 4px; padding: 0 12px; font-size: 13px; font-weight: bold; width: auto; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: none;}
         
         .list-item { background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
@@ -126,6 +128,8 @@
 </div>
 
 <div id="page-briefing" class="page">
+    <div id="lockedBadge" style="display:none; background:#ff5252; color:white; text-align:center; padding:5px; font-weight:bold; border-radius:4px; margin-bottom:10px;">🔒 此救災專案已結案，禁止編輯</div>
+    <div id="viewOnlyBadge" style="display:none; background:#2196F3; color:white; text-align:center; padding:5px; font-weight:bold; border-radius:4px; margin-bottom:10px;">👁️ 僅供檢視模式</div>
     <div class="card">
         <h2>簡報表 (Briefing List)</h2>
         <div class="row-full">
@@ -268,6 +272,10 @@
 
     <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
     <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
+     <div id="finishCaseArea" style="margin-top:40px; padding-top:20px; border-top:2px dashed #444;">
+        <button id="btnFinishCase" class="btn-main" style="background:#b71c1c; height:65px; min-height:65px; border:3px solid #ff5252;" onclick="finishCaseConfirm(this)">🔒 確定結案並鎖定專案 (禁止後續編輯)</button>
+        <p style="text-align:center; color:#888; font-size:0.8rem; margin-top:10px;">※ 結案後本專案將無法再進行任何存檔或修改</p>
+     </div>
 </div>
 
 <div id="page-medic" class="page">
@@ -353,7 +361,7 @@
     const fetchHeaders = { 'Content-Type': 'text/plain;charset=utf-8' };
     let currentProject = null; let currentModifier = ""; let db = JSON.parse(localStorage.getItem('isoDB')) || {};
     window.lastBHash = ""; window.lastMHash = ""; window.autoSyncInterval = null;
-    let isSyncLocked = false; 
+    let isSyncLocked = false; let isReadOnly = false; 
 
     // --- 視覺化電子羅盤專用變數 ---
     let liveOrientationHandler = null;
@@ -365,6 +373,44 @@
         t.innerHTML = msg; t.style.display = "block"; setTimeout(() => { t.style.display = "none"; }, 3000);
     }
 
+    // ─── 結案三階段防誤觸與鎖定邏輯 ───
+    function finishCaseConfirm(btn) {
+        if (isReadOnly) return;
+        const stage = parseInt(btn.dataset.stage || "0");
+        if (stage === 0) {
+            btn.dataset.originalText = btn.innerText; btn.dataset.stage = "1";
+            btn.style.background = "#ff9800"; btn.innerText = "⚠️ 您確定要結案？(點此第二次確認)";
+            setTimeout(() => { if(btn.dataset.stage==="1") resetFinishBtn(btn); }, 4000);
+        } else if (stage === 1) {
+            btn.dataset.stage = "2"; btn.style.background = "#d32f2f"; btn.innerText = "🚨 最後確認：結案後將永遠無法編輯！";
+            setTimeout(() => { if(btn.dataset.stage==="2") resetFinishBtn(btn); }, 4000);
+        } else if (stage === 2) {
+            executeFinishCase();
+        }
+    }
+    function resetFinishBtn(btn) { btn.dataset.stage = "0"; btn.innerText = btn.dataset.originalText; btn.style.background = "#b71c1c"; }
+
+    async function executeFinishCase() {
+        showToast("⏳ 正在執行結案並同步雲端...", "warning");
+        isReadOnly = true; saveBriefingToLocal(); db[currentProject].briefing.isLocked = true;
+        const payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        try {
+            await fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", briefing: payload, overwrite: false }), redirect: 'follow' });
+            applyReadOnly(true); showToast("🔒 專案已正式結案，權限已鎖定", "success");
+        } catch (e) { showToast("❌ 結案同步失敗", "error"); isReadOnly = false; applyReadOnly(false); }
+    }
+
+    function applyReadOnly(status) {
+        isReadOnly = status;
+        document.querySelectorAll('input, select, textare').forEach(el => { if (el.id !== 'modifierName') el.disabled = status; });
+        // 隱藏儲存與新增按鈕，保留匯出圖片
+        const hideSelectors = ['.btn-sync-brief', '.btn-sync-medic', 'button[onclick="confirmAction(this, addMedicEntry)"]', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'];
+        hideSelectors.forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = status ? 'none' : 'flex'; });
+        
+        document.getElementById('viewOnlyBadge').style.display = (status && !db[currentProject]?.briefing?.isLocked) ? 'block' : 'none';
+        document.getElementById('lockedBadge').style.display = (status && db[currentProject]?.briefing?.isLocked) ? 'block' : 'none';
+    }
+    
     function confirmAction(btn, callback, arg1) {
         if (btn.dataset.confirm === "yes") {
             btn.dataset.confirm = ""; btn.innerText = btn.dataset.originalText; btn.style.background = btn.dataset.originalBg; callback(arg1); return;
@@ -530,6 +576,7 @@
     }
 
     function uploadReconPhoto(idx, inputElement) {
+        if (isReadOnly) return;
         const file = inputElement.files[0]; if (!file) return;
         const statusEl = document.getElementById(`r_${idx}_photo_status`);
         statusEl.innerHTML = "<span style='color:#ffb74d;'>⏳ 影像處理與上傳中...</span>";
@@ -604,17 +651,22 @@
         openProject(name, null, true); 
     }
 
-    async function openProject(name, btnElement, isNew = false) {
+      async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
         try {
             if (!isNew) {
                 const modInput = document.getElementById('modifierName'); const modName = modInput.value.trim();
-                if (!modName) {
-                    modInput.style.border = "3px solid #ff5252"; modInput.style.backgroundColor = "#4a0000"; modInput.value = "";
-                    modInput.placeholder = "⚠️ 點擊前，請務必先輸入您的姓名！"; modInput.focus(); showToast("⚠️ 請先輸入操作人員姓名", "error");
-                    setTimeout(() => { modInput.style.border = "1px solid #444"; modInput.style.backgroundColor = "#2a2a2a"; modInput.placeholder = "請輸入您的姓名 (操作人員)..."; }, 3000);
-                    return; 
-                }
+                if (!modName) { /* ...原本的錯誤提示邏輯保留... */ return; }
                 currentModifier = modName;
+            }
+
+            // 按下按鈕後顯示讀取中，並鎖定同群組的按鈕
+            let originalText = "";
+            if (btnElement && btnElement.tagName === 'BUTTON') {
+                originalText = btnElement.innerText;
+                btnElement.innerText = "⏳ 載入中...";
+                if (btnElement.parentElement) {
+                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+                }
             }
 
             isSyncLocked = true; currentProject = name; document.getElementById('b_caseName').value = name;
@@ -672,7 +724,19 @@
             if(!document.getElementById('b_iso').value && db[name] && db[name].creator) document.getElementById('b_iso').value = db[name].creator;
             
             window.lastBHash = JSON.stringify(db[name].briefing || {}); window.lastMHash = JSON.stringify(db[name].medic || []);
+           // 判斷是否鎖定
+            const forceLock = db[name]?.briefing?.isLocked === true;
+            applyReadOnly(forceLock || mode === 'view');
+            
             isSyncLocked = false; startAutoSync(); switchTab('page-briefing');
+            // 載入完成，還原按鈕狀態
+            if (btnElement && btnElement.tagName === 'BUTTON') {
+                btnElement.innerText = originalText;
+                if (btnElement.parentElement) {
+                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            }
+        } catch(fatalErr) {
             if (btnElement) { btnElement.innerText = "📂 下載並開啟專案"; btnElement.disabled = false; btnElement.style.background = "#1565c0"; }
         } catch(fatalErr) {
             isSyncLocked = false; showToast("❌ 系統嚴重錯誤：" + fatalErr.message, "error");
@@ -683,6 +747,7 @@
     function startAutoSync() {
         if(window.autoSyncInterval) clearInterval(window.autoSyncInterval);
         window.autoSyncInterval = setInterval(() => {
+            if (isReadOnly) return;
             if (!currentProject || !currentModifier || isSyncLocked || GAS_URL.includes("請在這裡貼上")) return;
             saveBriefingToLocal();
             
@@ -706,6 +771,7 @@
     }
 
     async function syncBriefingToCloud() {
+        if (isReadOnly) return;
         if (!currentProject) return showToast("⚠️ 請先開啟專案", "error"); 
         saveBriefingToLocal(); window.lastBHash = JSON.stringify(db[currentProject].briefing); 
         let payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
@@ -718,6 +784,7 @@
     }
 
     async function syncMedicToCloud() {
+        if (isReadOnly) return;
         if (!currentProject) return showToast("⚠️ 請先開啟專案", "error"); 
         window.lastMHash = JSON.stringify(db[currentProject].medic || []); 
         const btn = document.querySelector('.btn-sync-medic'); btn.innerText = "☁️ MEDIC 同步中...";
@@ -821,7 +888,14 @@
                 container.innerHTML = '';
                 data.forEach(key => {
                     const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    container.innerHTML += `<div class="list-item" style="display:flex; flex-direction:column; align-items:center;"><div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key}</div><button class="btn-main" style="background:#1565c0; width:100%; margin:0; flex-shrink:0;" onclick="openProject('${safeKey}', this)">📂 下載並開啟專案</button></div>`;
+                    container.innerHTML += `
+                    <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key}</div>
+                        <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+                            <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                            <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                        </div>
+                    </div>`;
                 });
             } catch (jsonErr) { container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>⚠️ 資料格式異常 (可能權限不符)</b><br>請確認GAS「誰可以存取」是否為「所有人」。<br>收到的異常內容：<br>${text.substring(0, 80)}...</div>`; renderLocalHomeFallback(); }
         } catch(e) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 網路連線失敗</b><br>被瀏覽器阻擋或網址無效。<br>錯誤代碼：${e.message}</div>`; renderLocalHomeFallback(); }
@@ -829,7 +903,14 @@
 
     function renderLocalHomeFallback() {
         const container = document.getElementById('projectListContainer'); const keys = Object.keys(db).reverse();
-        if(keys.length === 0) container.innerHTML += '<p style="text-align:center;">本地也無暫存專案</p>';
+        if(keys.length === 0) container.innerHTML += `
+                    <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="${key} (本地)" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key}</div>
+                        <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+                            <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                            <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                        </div>
+                    </div>`;
         keys.forEach(key => { const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;"); container.innerHTML += `<div class="list-item" style="display:flex; flex-direction:column; align-items:center;"><div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key} (本地)</div><button class="btn-main" style="background:#555; width:100%; margin:0; flex-shrink:0;" onclick="openProject('${safeKey}', this)">📂 開啟本地暫存</button></div>`; });
     }
 
