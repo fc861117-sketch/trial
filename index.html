@@ -672,7 +672,7 @@ async function executeFinishCase() {
             } catch (e) { showToast("❌ 建立專案連線異常", "error"); }
         }
         btn.innerText = "建立新專案"; btn.disabled = false; btn.style.background = "var(--primary)"; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectCreator').value = '';
-        openProject(name, null, true); 
+        openProject(name, 'edit', null, true);
     }
 
     async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
