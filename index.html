@@ -404,7 +404,7 @@
 
     function applyReadOnly(status) {
         isReadOnly = status;
-        document.querySelectorAll('input, select, textare').forEach(el => { if (el.id !== 'modifierName') el.disabled = status; });
+        document.querySelectorAll('input, select, textarea').forEach(el => { if (el.id !== 'modifierName') el.disabled = status; });
         // 隱藏儲存與新增按鈕，保留匯出圖片
         const hideSelectors = ['.btn-sync-brief', '.btn-sync-medic', 'button[onclick="confirmAction(this, addMedicEntry)"]', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'];
         hideSelectors.forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = status ? 'none' : 'flex'; });
@@ -713,7 +713,7 @@
                         let extractedId = pId;
                         if (!extractedId && pUrl.includes('/d/')) { extractedId = pUrl.split('/d/')[1].split('/')[0]; }
                         else if (!extractedId && pUrl.includes('id=')) { extractedId = pUrl.split('id=')[1].split('&')[0]; }
-                        let rawImgUrl = extractedId ? `https://lh3.googleusercontent.com/d/${extractedId}` : pUrl;
+                        let rawImgUrl = extractedId ? `https://drive.google.com/uc?export=view&id=${pId}` : pUrl;
                         
                         document.getElementById(`r_${i}_photo_status`).innerHTML = `
                             <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
