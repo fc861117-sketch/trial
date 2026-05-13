@@ -713,7 +713,7 @@
                         let extractedId = pId;
                         if (!extractedId && pUrl.includes('/d/')) { extractedId = pUrl.split('/d/')[1].split('/')[0]; }
                         else if (!extractedId && pUrl.includes('id=')) { extractedId = pUrl.split('id=')[1].split('&')[0]; }
-                        let rawImgUrl = extractedId ? `https://drive.google.com/uc?export=view&id=${pId}` : pUrl;
+                        let rawImgUrl = extractedId ? `https://drive.google.com/uc?export=view&id=${extractedId}` : pUrl;
                         
                         document.getElementById(`r_${i}_photo_status`).innerHTML = `
                             <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
@@ -900,17 +900,20 @@
         } catch(e) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 網路連線失敗</b><br>被瀏覽器阻擋或網址無效。<br>錯誤代碼：${e.message}</div>`; renderLocalHomeFallback(); }
     }
 
-    function renderLocalHomeFallback() {
+function renderLocalHomeFallback() {
         const container = document.getElementById('projectListContainer'); const keys = Object.keys(db).reverse();
         if(keys.length === 0) container.innerHTML += '<p style="text-align:center;">本地也無暫存專案</p>';
-        keys.forEach(key => { const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;"); container.innerHTML += `
-                    <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="${key} (本地)" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key}</div>
-                        <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
-                            <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
-                            <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
-                        </div>
-                    </div>`;
+        keys.forEach(key => { 
+            const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
+            container.innerHTML += `
+            <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
+                <div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key} (本地)</div>
+                <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+                    <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                    <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                </div>
+            </div>`; 
+        });
     }
 
     function saveBriefingToLocal() {
