@@ -600,7 +600,7 @@
                     if (res.error) { showToast("❌ 系統錯誤", "error"); return statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 系統錯誤</span>`; }
                     document.getElementById(`r_${idx}_photo_url`).value = res.url; document.getElementById(`r_${idx}_photo_id`).value = res.fileId; document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
                     
-                    let rawImgUrl = `https://lh3.googleusercontent.com/d/${res.fileId}`;
+                    let rawImgUrl = `https://drive.google.com/uc?export=view&id=${res.fileId}`;
                     
                     statusEl.innerHTML = `
                         <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
