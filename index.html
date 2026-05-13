@@ -392,14 +392,37 @@
     }
     function resetFinishBtn(btn) { btn.dataset.stage = "0"; btn.innerText = btn.dataset.originalText; btn.style.background = "#b71c1c"; }
 
-    async function executeFinishCase() {
+async function executeFinishCase() {
         showToast("⏳ 正在執行結案並同步雲端...", "warning");
-        isReadOnly = true; saveBriefingToLocal(); db[currentProject].briefing.isLocked = true;
-        const payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        isReadOnly = true; 
+        
+        // 1. 將所有未結案的 MEDIC 事件強制結案
+        if(db[currentProject].medic) {
+            db[currentProject].medic.forEach(m => m.completed = true);
+        }
+        
+        saveBriefingToLocal(); 
+        db[currentProject].briefing.isLocked = true;
+        saveDB(); // 確保 MEDIC 變更寫入本地
+        
+        const payloadB = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        const payloadM = db[currentProject].medic || [];
+        
         try {
-            await fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", briefing: payload, overwrite: false }), redirect: 'follow' });
-            applyReadOnly(true); showToast("🔒 專案已正式結案，權限已鎖定", "success");
-        } catch (e) { showToast("❌ 結案同步失敗", "error"); isReadOnly = false; applyReadOnly(false); }
+            // 2. 同時將簡報表與 MEDIC 同步至雲端
+            let p1 = fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", briefing: payloadB, overwrite: false }), redirect: 'follow' });
+            let p2 = fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'saveMedic', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", medic: payloadM, overwrite: false }), redirect: 'follow' });
+            
+            await Promise.all([p1, p2]);
+            
+            applyReadOnly(true); 
+            renderMedicList(); // 更新 MEDIC 列表畫面，按鈕會變成綠色的「🔒 已結案」
+            showToast("🔒 專案與 MEDIC 已正式結案鎖定", "success");
+        } catch (e) { 
+            showToast("❌ 結案同步失敗", "error"); 
+            isReadOnly = false; 
+            applyReadOnly(false); 
+        }
     }
 
     function applyReadOnly(status) {
@@ -656,7 +679,12 @@
         try {
             if (!isNew) {
                 const modInput = document.getElementById('modifierName'); const modName = modInput.value.trim();
-                if (!modName) { /* ...原本的錯誤提示邏輯保留... */ return; }
+                if (!modName) {
+                    modInput.style.border = "3px solid #ff5252"; modInput.style.backgroundColor = "#4a0000"; modInput.value = "";
+                    modInput.placeholder = "⚠️ 點擊前，請務必先輸入您的姓名！"; modInput.focus(); showToast("⚠️ 請先輸入操作人員姓名", "error");
+                    setTimeout(() => { modInput.style.border = "1px solid #444"; modInput.style.backgroundColor = "#2a2a2a"; modInput.placeholder = "請輸入您的姓名 (操作人員)..."; }, 3000);
+                    return; 
+                }
                 currentModifier = modName;
             }
 
