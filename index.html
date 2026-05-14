@@ -621,18 +621,15 @@ function uploadReconPhoto(idx, inputElement) {
                     body: JSON.stringify({ action: 'uploadPhoto', projectName: currentProject, filename: `R_${idx}_${Date.now()}.jpg`, mimeType: 'image/jpeg', base64: base64Data }), redirect: 'follow'
                 }).then(r=>r.json()).then(res => {
                     if (res.error) { showToast("❌ 系統錯誤", "error"); return statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 系統錯誤</span>`; }
-                    
-                    let myId = res.fileId || (res.url && res.url.includes('/d/') ? res.url.split('/d/')[1].split('/')[0] : (res.url && res.url.includes('id=') ? res.url.split('id=')[1].split('&')[0] : ''));
                     document.getElementById(`r_${idx}_photo_url`).value = res.url; 
-                    document.getElementById(`r_${idx}_photo_id`).value = myId; 
+                    document.getElementById(`r_${idx}_photo_id`).value = res.fileId;
                     document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
-                    
                     statusEl.innerHTML = `
-                        <img src="https://drive.google.com/uc?export=view&id=${myId}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
-                        <div style="margin-top:5px;"><a href="${res.url}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
-                    `;
+                    <img src="https://drive.google.com/thumbnail?id=${myId}&sz=w800" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                    <div style="margin-top:5px;"><a href="${res.url}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
+                `;
                     saveBriefingToLocal(); showToast(`✅ 第${idx+1}面照片上傳成功！`, "success");
-                }).catch(err => { statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 上傳失敗，請確認網路</span>`; showToast("❌ 照片上傳異常", "error"); });
+                }).catch(err => { statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 上傳失敗</span>`; showToast("❌ 照片上傳異常", "error"); });
             }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
     }
@@ -681,6 +678,7 @@ function uploadReconPhoto(idx, inputElement) {
 async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
         let originalText = "";
         try {
+            // 修正：檢查姓名邏輯應放在 if(!isNew) 裡面，建立新專案才不會被擋
             if (!isNew) {
                 const modInput = document.getElementById('modifierName'); const modName = modInput.value.trim();
                 if (!modName) {
@@ -693,93 +691,48 @@ async function openProject(name, mode = 'edit', btnElement = null, isNew = false
             }
 
             isSyncLocked = true; currentProject = name; document.getElementById('b_caseName').value = name;
-            
-            // 按下按鈕後顯示讀取中，並鎖定同群組的按鈕
             if (btnElement && btnElement.tagName === 'BUTTON') { 
-                originalText = btnElement.innerText; 
-                btnElement.innerText = "⏳ 載入中..."; 
-                if (btnElement.parentElement) {
-                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
-                }
+                originalText = btnElement.innerText; btnElement.innerText = "⏳ 載入中..."; 
+                if (btnElement.parentElement) { btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = true); }
             }
 
             clearAllForms(); if (!db[name]) db[name] = { briefing: {}, medic: [] };
 
             if (!GAS_URL.includes("請在這裡貼上")) {
-                try {
-                    const resp = await fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'getProjectData', projectName: name }), redirect: 'follow' });
-                    const text = await resp.text();
-                    try {
-                        const cloudData = JSON.parse(text);
-                        if(cloudData.error) { showToast("❌ 下載資料失敗：" + cloudData.error, "error"); } 
-                        else {
-                            if (cloudData.creator) db[name].creator = cloudData.creator;
-                            if (cloudData.briefing && Object.keys(cloudData.briefing).length > 0) db[name].briefing = cloudData.briefing;
-                            if (cloudData.medic && cloudData.medic.length > 0) db[name].medic = cloudData.medic;
-                            saveDB(); if(!isNew) showToast("✅ 雲端資料下載成功", "success");
-                        }
-                    } catch (parseErr) { showToast("⚠️ 資料格式錯誤，已載入本地暫存", "warning"); }
-                } catch (netErr) { showToast("⚠️ 網路斷線，已載入本地暫存", "warning"); }
+                const resp = await fetch(GAS_URL + "?t=" + new Date().getTime(), { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ action: 'getProjectData', projectName: name }), redirect: 'follow' });
+                const text = await resp.text();
+                const cloudData = JSON.parse(text);
+                if(!cloudData.error) {
+                    db[name] = cloudData; saveDB();
+                }
             }
 
             if(db[name] && db[name].briefing) {
                 Object.keys(db[name].briefing).forEach(key => { const el = document.getElementById(key); if(el) el.value = db[name].briefing[key]; });
                 toggleStructureOther(); toggleUsageOther(); 
-                if (document.getElementById('b_area_input') && db[name].briefing['b_area_input']) {
-                    document.getElementById('b_area_input').value = db[name].briefing['b_area_input']; if (db[name].briefing['b_area_unit']) document.getElementById('b_area_unit').value = db[name].briefing['b_area_unit'];
-                }
-
-                let weatherVal = db[name].briefing['e_weather'] || ""; document.getElementById('e_weather').value = weatherVal;
-                let windVal = db[name].briefing['e_wind'] || "無風"; document.getElementById('e_wind').value = windVal;
-                document.querySelectorAll('.wind-btn').forEach(b => { 
-                    b.classList.remove('active'); let t = b.innerText;
-                    if (windVal===t || (windVal==="西北風"&&t==="NW")||(windVal==="北風"&&t==="N")||(windVal==="東北風"&&t==="NE")||(windVal==="西風"&&t==="W")||(windVal==="東風"&&t==="E")||(windVal==="西南風"&&t==="SW")||(windVal==="南風"&&t==="S")||(windVal==="東南風"&&t==="SE")||(windVal==="無風"&&t==="無")) { b.classList.add('active'); }
-                });
-
+                // 渲染縮圖 - 修正語法 ${}
                 for(let i=0; i<4; i++) {
+                    const pId = db[name].briefing[`r_${i}_photo_id`];
                     const pUrl = db[name].briefing[`r_${i}_photo_url`];
-                    let pId = db[name].briefing[`r_${i}_photo_id`];
                     const pStatus = document.getElementById(`r_${i}_photo_status`);
-                    if (pUrl && pUrl !== "") {
-                        if (!pId && pUrl.includes('/d/')) { pId = pUrl.split('/d/')[1].split('/')[0]; }
-                        else if (!pId && pUrl.includes('id=')) { pId = pUrl.split('id=')[1].split('&')[0]; }
-                        
-                        if (pId) {
-                            pStatus.innerHTML = `
-                                <img src="https://drive.google.com/uc?export=view&id=${pId}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
-                                <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
-                            `;
-                        } else {
-                            pStatus.innerHTML = `<div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>`;
-                        }
+                    if (pId) {
+                        pStatus.innerHTML = `<img src="https://drive.google.com/thumbnail?id=${pId}&sz=w800" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                        <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>`;
                     }
                 }
             }
-            if(!document.getElementById('b_iso').value && db[name] && db[name].creator) document.getElementById('b_iso').value = db[name].creator;
             
-            window.lastBHash = JSON.stringify(db[name].briefing || {}); window.lastMHash = JSON.stringify(db[name].medic || []);
-            
-            // 判斷是否鎖定 (若雲端標記已結案，或使用者點擊「僅供檢視」)
             const forceLock = db[name]?.briefing?.isLocked === true;
             applyReadOnly(forceLock || mode === 'view');
-
             isSyncLocked = false; startAutoSync(); switchTab('page-briefing');
             
-            // 載入完成，還原按鈕
             if (btnElement && btnElement.tagName === 'BUTTON') {
                 btnElement.innerText = originalText;
-                if (btnElement.parentElement) {
-                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
-                }
+                if (btnElement.parentElement) { btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false); }
             }
         } catch(fatalErr) {
-            isSyncLocked = false; showToast("❌ 系統嚴重錯誤：" + fatalErr.message, "error");
-            if (btnElement && btnElement.tagName === 'BUTTON') { 
-                btnElement.innerText = "⚠️ 開啟失敗"; btnElement.disabled = false; btnElement.style.background = "#d32f2f"; 
-                if (btnElement.parentElement) {
-                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
-                }
-            }
+            isSyncLocked = false; showToast("❌ 載入失敗", "error");
+            if (btnElement && btnElement.tagName === 'BUTTON') { btnElement.innerText = "⚠️ 失敗"; btnElement.disabled = false; }
         }
     }
 
@@ -918,7 +871,7 @@ async function openProject(name, mode = 'edit', btnElement = null, isNew = false
         switchTab('page-home'); 
     }
 
-    async function renderHome() {
+async function renderHome() {
         const container = document.getElementById('projectListContainer'); container.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">🔄 讀取雲端資料庫中...</div>';
         if (GAS_URL.includes("請在這裡貼上")) { container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>⚠️ 系統設定錯誤</b><br>您尚未在下方貼上 GAS_URL 網址！<br>已強制切換為本地模式。</div>`; return renderLocalHomeFallback(); }
         try {
@@ -936,13 +889,13 @@ async function openProject(name, mode = 'edit', btnElement = null, isNew = false
                     <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
                         <div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key}</div>
                         <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
-                            <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
-                            <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                            <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                            <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
                         </div>
                     </div>`;
                 });
-            } catch (jsonErr) { container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>⚠️ 資料格式異常 (可能權限不符)</b><br>請確認GAS「誰可以存取」是否為「所有人」。<br>收到的異常內容：<br>${text.substring(0, 80)}...</div>`; renderLocalHomeFallback(); }
-        } catch(e) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 網路連線失敗</b><br>被瀏覽器阻擋或網址無效。<br>錯誤代碼：${e.message}</div>`; renderLocalHomeFallback(); }
+            } catch (jsonErr) { container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>⚠️ 資料格式異常</b><br>收到的異常內容：<br>${text.substring(0, 80)}...</div>`; renderLocalHomeFallback(); }
+        } catch(e) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 網路連線失敗</b><br>錯誤代碼：${e.message}</div>`; renderLocalHomeFallback(); }
     }
 
 function renderLocalHomeFallback() {
