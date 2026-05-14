@@ -894,7 +894,11 @@ async function renderHome() {
                         </div>
                     </div>`;
                 });
-            } catch (jsonErr) { container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>⚠️ 資料格式異常</b><br>收到的異常內容：<br>${text.substring(0, 80)}...</div>`; renderLocalHomeFallback(); }
+            } catch (jsonErr) { 
+                // 修正：必須使用反引號 ` ` 才能支援多行文字與變數
+                container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>⚠️ 資料格式異常 (可能權限不符)</b><br>請確認GAS「誰可以存取」是否為「所有人」。<br>收到的異常內容：<br>${text ? text.substring(0, 80) : "無回傳內容"}...</div>`; 
+                renderLocalHomeFallback(); 
+            }
         } catch(e) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 網路連線失敗</b><br>錯誤代碼：${e.message}</div>`; renderLocalHomeFallback(); }
     }
 
