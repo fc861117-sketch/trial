@@ -599,7 +599,7 @@ async function executeFinishCase() {
         document.querySelectorAll('.floor-select, .num-select').forEach(el => { if(el.options.length === 0) el.innerHTML = fOpts; });
     }
 
-    function uploadReconPhoto(idx, inputElement) {
+function uploadReconPhoto(idx, inputElement) {
         if (isReadOnly) return;
         const file = inputElement.files[0]; if (!file) return;
         const statusEl = document.getElementById(`r_${idx}_photo_status`);
@@ -621,18 +621,21 @@ async function executeFinishCase() {
                     body: JSON.stringify({ action: 'uploadPhoto', projectName: currentProject, filename: `R_${idx}_${Date.now()}.jpg`, mimeType: 'image/jpeg', base64: base64Data }), redirect: 'follow'
                 }).then(r=>r.json()).then(res => {
                     if (res.error) { showToast("❌ 系統錯誤", "error"); return statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 系統錯誤</span>`; }
-                    document.getElementById(`r_${idx}_photo_url`).value = res.url; document.getElementById(`r_${idx}_photo_id`).value = res.fileId; document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
                     
-                    let rawImgUrl = `https://drive.google.com/uc?export=view&id=${res.fileId}`;
+                    let myId = res.fileId || (res.url && res.url.includes('/d/') ? res.url.split('/d/')[1].split('/')[0] : (res.url && res.url.includes('id=') ? res.url.split('id=')[1].split('&')[0] : ''));
+                    document.getElementById(`r_${idx}_photo_url`).value = res.url; 
+                    document.getElementById(`r_${idx}_photo_id`).value = myId; 
+                    document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
                     
                     statusEl.innerHTML = `
-                        <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                        <img src="https://drive.google.com/uc?export=view&id=${myId}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
                         <div style="margin-top:5px;"><a href="${res.url}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
                     `;
                     saveBriefingToLocal(); showToast(`✅ 第${idx+1}面照片上傳成功！`, "success");
                 }).catch(err => { statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 上傳失敗，請確認網路</span>`; showToast("❌ 照片上傳異常", "error"); });
             }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
+    }
     }
 
     function clearAllForms() {
@@ -675,7 +678,8 @@ async function executeFinishCase() {
         openProject(name, 'edit', null, true);
     }
 
-    async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
+async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
+        let originalText = "";
         try {
             if (!isNew) {
                 const modInput = document.getElementById('modifierName'); const modName = modInput.value.trim();
@@ -688,18 +692,16 @@ async function executeFinishCase() {
                 currentModifier = modName;
             }
 
+            isSyncLocked = true; currentProject = name; document.getElementById('b_caseName').value = name;
+            
             // 按下按鈕後顯示讀取中，並鎖定同群組的按鈕
-            let originalText = "";
-            if (btnElement && btnElement.tagName === 'BUTTON') {
-                originalText = btnElement.innerText;
-                btnElement.innerText = "⏳ 載入中...";
+            if (btnElement && btnElement.tagName === 'BUTTON') { 
+                originalText = btnElement.innerText; 
+                btnElement.innerText = "⏳ 載入中..."; 
                 if (btnElement.parentElement) {
                     btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
                 }
             }
-
-            isSyncLocked = true; currentProject = name; document.getElementById('b_caseName').value = name;
-            if (btnElement) { btnElement.innerText = "⏳ 雲端下載中..."; btnElement.disabled = true; btnElement.style.background = "#555"; }
 
             clearAllForms(); if (!db[name]) db[name] = { briefing: {}, medic: [] };
 
@@ -736,39 +738,48 @@ async function executeFinishCase() {
 
                 for(let i=0; i<4; i++) {
                     const pUrl = db[name].briefing[`r_${i}_photo_url`];
-                    const pId = db[name].briefing[`r_${i}_photo_id`];
+                    let pId = db[name].briefing[`r_${i}_photo_id`];
+                    const pStatus = document.getElementById(`r_${i}_photo_status`);
                     if (pUrl && pUrl !== "") {
-                        let extractedId = pId;
-                        if (!extractedId && pUrl.includes('/d/')) { extractedId = pUrl.split('/d/')[1].split('/')[0]; }
-                        else if (!extractedId && pUrl.includes('id=')) { extractedId = pUrl.split('id=')[1].split('&')[0]; }
-                        let rawImgUrl = extractedId ? `https://drive.google.com/uc?export=view&id=${extractedId}` : pUrl;
+                        if (!pId && pUrl.includes('/d/')) { pId = pUrl.split('/d/')[1].split('/')[0]; }
+                        else if (!pId && pUrl.includes('id=')) { pId = pUrl.split('id=')[1].split('&')[0]; }
                         
-                        document.getElementById(`r_${i}_photo_status`).innerHTML = `
-                            <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
-                            <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
-                        `;
+                        if (pId) {
+                            pStatus.innerHTML = `
+                                <img src="https://drive.google.com/uc?export=view&id=${pId}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                                <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
+                            `;
+                        } else {
+                            pStatus.innerHTML = `<div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>`;
+                        }
                     }
                 }
             }
             if(!document.getElementById('b_iso').value && db[name] && db[name].creator) document.getElementById('b_iso').value = db[name].creator;
             
             window.lastBHash = JSON.stringify(db[name].briefing || {}); window.lastMHash = JSON.stringify(db[name].medic || []);
-           // 判斷是否鎖定
+            
+            // 判斷是否鎖定 (若雲端標記已結案，或使用者點擊「僅供檢視」)
             const forceLock = db[name]?.briefing?.isLocked === true;
             applyReadOnly(forceLock || mode === 'view');
 
             isSyncLocked = false; startAutoSync(); switchTab('page-briefing');
-           // 載入完成，還原按鈕狀態
+            
+            // 載入完成，還原按鈕
             if (btnElement && btnElement.tagName === 'BUTTON') {
                 btnElement.innerText = originalText;
                 if (btnElement.parentElement) {
                     btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
                 }
             }
-            if (btnElement) { btnElement.innerText = "📂 下載並開啟專案"; btnElement.disabled = false; btnElement.style.background = "#1565c0"; }
         } catch(fatalErr) {
             isSyncLocked = false; showToast("❌ 系統嚴重錯誤：" + fatalErr.message, "error");
-            if (btnElement) { btnElement.innerText = "⚠️ 開啟失敗"; btnElement.disabled = false; btnElement.style.background = "#d32f2f"; }
+            if (btnElement && btnElement.tagName === 'BUTTON') { 
+                btnElement.innerText = "⚠️ 開啟失敗"; btnElement.disabled = false; btnElement.style.background = "#d32f2f"; 
+                if (btnElement.parentElement) {
+                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            }
         }
     }
 
