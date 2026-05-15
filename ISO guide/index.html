@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防事故安全官 (ISO) 現場作業指南</title>
+    <style>
+        :root {
+            --primary-color: #0f172a;
+            --secondary-color: #334155;
+            --accent-red: #dc2626;
+            --accent-blue: #2563eb;
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --white: #ffffff;
+            --yellow-warn: #fef08a;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent-red);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent-blue);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Tab Buttons Navigation */
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background-color: #e2e8f0;
+            color: var(--secondary-color);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Tab Content Area */
+        .tab-content {
+            display: none;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 10px;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            color: var(--accent-red);
+            font-size: 1.1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        /* Checklist Styles */
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .checklist li {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-blue);
+        }
+
+        .checklist span {
+            flex: 1;
+        }
+
+        ul.bullet-list {
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        ul.bullet-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background-color: #fee2e2;
+            border: 2px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 1.2rem;
+            color: #991b1b;
+            margin-top: 1rem;
+        }
+
+        .warning-box strong {
+            display: block;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .tab-nav { flex-direction: column; }
+            .tab-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="badge">Incident Safety Officer</div>
+    <h1>消防事故安全官 (ISO) 作業指南</h1>
+</header>
+
+<div class="container">
+    
+    <!-- 分頁按鈕區 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-initial')">① 初期作為</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-hazard')">② 危害監控</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-personnel')">③ 人員與醫療</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-emergency')">④ 緊急程序</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-post')">⑤ 災後復原</button>
+    </div>
+
+    <!-- 內容區：① 初期作為 -->
+    <div id="tab-initial" class="tab-content active">
+        <h2>抵達現場首要行動</h2>
+        <ul class="checklist">
+            <li><input type="checkbox"> <span><strong>向指揮官(IC)報到：</strong>確認目前戰術目標(救援/防護/滅火)、整體計畫 (IAP) 與安全官專屬通訊頻道。</span></li>
+            <li><input type="checkbox"> <span><strong>執行 360 度勘查：</strong>親自繞行現場一圈，確認各面 (A/B/C/D) 狀況，回報指揮官未注意到的死角或潛在危害。</span></li>
+            <li><input type="checkbox"> <span><strong>評估水電瓦斯管制：</strong>確認台電、欣高/天然氣公司是否已到場或已切斷危險源。</span></li>
+            <li><input type="checkbox"> <span><strong>確認管制系統：</strong>確認人員管制看板 (Accountability) 已啟用，並劃定熱區 (Hot)、暖區 (Warm)、冷區 (Cold)。</span></li>
+            <li><input type="checkbox"> <span><strong>RIC 整備確認：</strong>確認快速救援小組 (RIC) 裝備齊全（備用氣瓶、破壞器材、搜救繩）且位於進入點附近待命。</span></li>
+        </ul>
+    </div>
+
+    <!-- 內容區：② 危害監控 -->
+    <div id="tab-hazard" class="tab-content">
+        <h2>現場危害指標監控</h2>
+        
+        <h3>🏢 建築結構風險</h3>
+        <ul class="bullet-list">
+            <li><strong>輕量化結構：</strong>確認是否為鐵皮屋、木造或輕鋼架結構，這類建築在受熱 5-10 分鐘後即有極高坍塌風險。</li>
+            <li><strong>倒塌前兆觀察：</strong>牆面出現裂縫或變形、屋頂下陷、門窗框扭曲、結構發出異常撕裂聲響、積水過多導致樓板超載。</li>
+        </ul>
+
+        <h3>💨 煙霧判讀 (VVDC)</h3>
+        <ul class="bullet-list">
+            <li><strong>體積 (Volume)：</strong>煙霧量大代表燃料多，持續增加代表火勢擴大。</li>
+            <li><strong>流速 (Velocity)：</strong>噴射狀的高速煙霧代表內部蓄熱極高，為閃燃或爆燃前兆。</li>
+            <li><strong>密度 (Density)：</strong>濃稠不見光的煙霧含有大量未燃燒氣體，極具爆炸危險。</li>
+            <li><strong>顏色 (Color)：</strong>棕色/黃色煙霧常為木材結構深度燃燒或化學物質；深黑色為碳氫化合物(塑膠/石油)燃燒。</li>
+        </ul>
+
+        <h3>⚠️ 特殊與外部危害</h3>
+        <ul class="bullet-list">
+            <li>留意掉落物、高壓電線、惡劣天候（強風導致火勢轉向）。</li>
+            <li>確認是否有危害物質 (HazMat) 標示，必要時建議指揮官擴大冷區半徑。</li>
+        </ul>
+    </div>
+
+    <!-- 內容區：③ 人員與醫療 -->
+    <div id="tab-personnel" class="tab-content">
+        <h2>人員安全與復健管理</h2>
+        
+        <h3>🛡️ 防護與空氣管理</h3>
+        <ul class="checklist">
+            <li><input type="checkbox"> <span>嚴格要求所有接近暖區/熱區人員，必須確實扣妥 SCBA 面罩與穿戴頭套，不得有肌膚外露。</span></li>
+            <li><input type="checkbox"> <span>監控入室小組的工作時間，落實「空氣管理」，確保人員預留足夠氣量撤出。</span></li>
+            <li><input type="checkbox"> <span>留意隊員是否出現「隧道視野」(Tunnel Vision)——過度專注滅火而忽略周遭危險。</span></li>
+        </ul>
+
+        <h3>🚑 復健區 (Rehab) 設立標準</h3>
+        <ul class="bullet-list">
+            <li><strong>位置：</strong>必須設在冷區、上風處，且避免救災車輛廢氣干擾。</li>
+            <li><strong>強制休息時機：</strong>消耗兩支 SCBA 氣瓶，或連續高強度作業達 40 分鐘，必須強制進入 Rehab 區休息至少 10-20 分鐘。</li>
+            <li><strong>生理監測指標：</strong>
+                <br>- 休息 20 分鐘後，心跳若仍大於 100 次/分，或體溫超過 38°C，禁止再次投入熱區。
+                <br>- 確保人員卸下沉重裝備，主動補充水分與電解質，並監控是否有中暑、熱衰竭前兆。
+            </li>
+        </ul>
+    </div>
+
+    <!-- 內容區：④ 緊急程序 -->
+    <div id="tab-emergency" class="tab-content">
+        <h2>緊急狀況處置原則</h2>
+        
+        <div class="warning-box">
+            <strong>⛔ 安全官絕對停止權 (Stop Work Authority)</strong>
+            當發現「立即危及生命健康 (IDLH)」之極端危險時（如屋頂即將坍塌、閃燃前兆）：
+            <ul class="bullet-list" style="margin-bottom: 0;">
+                <li><strong>ISO 有權繞過指揮官，直接下令停止該危險作業或撤出人員。</strong></li>
+                <li>發布指令後，必須立刻向指揮官(IC)回報處置原因。</li>
+            </ul>
+        </div>
+
+        <h3>🚨 啟動緊急撤退 (Emergency Evacuation)</h3>
+        <ul class="checklist">
+            <li><input type="checkbox"> <span>確保無線電發送「緊急撤退」代碼或專屬長音提示。</span></li>
+            <li><input type="checkbox"> <span>確認現場車輛同步鳴按氣笛 (例如：連續短鳴 3 次，每次 10 秒，重複 3 遍，依各局規定)。</span></li>
+            <li><input type="checkbox"> <span>撤退後立即協助 IC 執行全員清點 (PAR)。</span></li>
+        </ul>
+
+        <h3>🆘 Mayday (求救) 狀況配合</h3>
+        <ul class="bullet-list">
+            <li>當無線電傳出 Mayday 時，ISO 應協助指揮官維持通訊紀律（淨空主頻道）。</li>
+            <li>協調備用 RIC 小組遞補原先出動的 RIC 位置。</li>
+            <li>監控救援行動的風險，避免引發「救援者效應」(過多人員未經管制衝入火場救援)。</li>
+        </ul>
+    </div>
+
+    <!-- 內容區：⑤ 災後復原 -->
+    <div id="tab-post" class="tab-content">
+        <h2>任務結束與災後作業</h2>
+        <ul class="checklist">
+            <li><input type="checkbox"> <span><strong>人員清點 (PAR)：</strong>所有作業結束後，確保現場所有單位完成人員清點。</span></li>
+            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>監督人員在卸下 SCBA 面罩前，完成消防衣的初步清洗，降低致癌微粒附著。</span></li>
+            <li><input type="checkbox"> <span><strong>裝備打包安全：</strong>提醒人員將受汙染的消防衣與一般衣物/車廂隔離。</span></li>
+            <li><input type="checkbox"> <span><strong>收集資訊：</strong>記錄本次救災的優良處置與安全缺失。</span></li>
+            <li><input type="checkbox"> <span><strong>災後檢討 (AAR)：</strong>參與災後檢討會議，以安全官角度提出改善建議。</span></li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        本指引內容參考國內外消防安全官 (ISO) 訓練準則與 ICS 系統<br>
+        © 2026 現場安全查核系統
+    </div>
+
+</div>
+
+<!-- 分頁切換腳本 -->
+<script>
+    function openTab(evt, tabId) {
+        // 隱藏所有分頁內容
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+
+        // 移除所有按鈕的 active 狀態
+        var tabBtns = document.getElementsByClassName("tab-btn");
+        for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove("active");
+        }
+
+        // 顯示被點擊的分頁內容
+        document.getElementById(tabId).classList.add("active");
+        
+        // 將被點擊的按鈕設為 active
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+</body>
+</html>
