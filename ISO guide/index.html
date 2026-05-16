@@ -12,6 +12,9 @@
             --secondary-color: #334155;
             --accent-red: #dc2626;
             --accent-blue: #2563eb;
+            --accent-green: #059669;
+            --accent-orange: #ea580c;
+            --accent-cyan: #0891b2;
             --bg-light: #f8fafc;
             --text-main: #1e293b;
             --white: #ffffff;
@@ -67,7 +70,7 @@
         .tab-nav {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 1.5rem;
             justify-content: center;
         }
@@ -76,9 +79,9 @@
             background-color: #e2e8f0;
             color: var(--secondary-color);
             border: none;
-            padding: 10px 16px;
+            padding: 10px 12px;
             border-radius: 6px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -119,18 +122,46 @@
             color: var(--primary-color);
             border-left: 4px solid var(--accent-blue);
             padding-left: 10px;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             margin-top: 0;
             margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        h3 {
-            color: var(--accent-red);
-            font-size: 1.1rem;
-            margin-top: 1.2rem;
-            margin-bottom: 0.5rem;
-            border-bottom: 1px solid #e2e8f0;
+        .medic-tag {
+            font-size: 0.8rem;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--secondary-color);
+        }
+
+        /* Category styling */
+        .category-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .category-box h3 {
+            margin-top: 0;
+            margin-bottom: 0.8rem;
             padding-bottom: 5px;
+            border-bottom: 2px solid #cbd5e1;
+            font-size: 1.1rem;
+            color: var(--accent-red);
+        }
+
+        h4 {
+            color: var(--secondary-color);
+            font-size: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
         }
 
         /* Checklist Styles */
@@ -141,7 +172,7 @@
         }
 
         .checklist li {
-            padding: 0.75rem 0;
+            padding: 0.6rem 0;
             border-bottom: 1px dashed #e2e8f0;
             display: flex;
             align-items: flex-start;
@@ -152,28 +183,40 @@
         }
 
         .checklist input[type="checkbox"] {
-            margin-right: 12px;
+            margin-right: 10px;
             margin-top: 4px;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
             accent-color: var(--accent-blue);
         }
 
         .checklist span {
             flex: 1;
+            font-size: 0.95rem;
         }
 
         ul.bullet-list {
             padding-left: 1.5rem;
             margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
         }
 
         ul.bullet-list li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
-        /* Warning Box */
+        /* Highlight Boxes */
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+
         .warning-box {
             background-color: #fee2e2;
             border: 2px solid var(--accent-red);
@@ -181,12 +224,30 @@
             padding: 1.2rem;
             color: #991b1b;
             margin-top: 1rem;
+            margin-bottom: 1rem;
         }
 
         .warning-box strong {
             display: block;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             margin-bottom: 0.5rem;
+        }
+
+        /* Tool Tables */
+        .tool-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .tool-table th, .tool-table td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: left;
+        }
+        .tool-table th {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
         }
 
         .footer {
@@ -197,154 +258,211 @@
         }
 
         @media (max-width: 600px) {
-            .tab-nav { flex-direction: column; }
-            .tab-btn { width: 100%; }
+            .tab-nav { flex-direction: row; }
+            .tab-btn { width: 48%; padding: 8px; font-size: 0.85rem;}
+            .category-box { padding: 0.8rem; }
         }
     </style>
 </head>
 <body>
-    {% include nav.html %}
+{% include nav.html %}
 <header>
     <div class="badge">Incident Safety Officer</div>
-    <h1>消防事故安全官 (ISO) 作業指南</h1>
+    <h1>消防事故安全官 (ISO) 現場作業指引</h1>
 </header>
 
 <div class="container">
     
-    <!-- 分頁按鈕區 -->
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="openTab(event, 'tab-initial')">① 初期作為</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-hazard')">② 危害監控</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-personnel')">③ 人員與醫療</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-emergency')">④ 緊急程序</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-post')">⑤ 災後復原</button>
+        <button class="tab-btn active" onclick="openTab(event, 'tab-initial')">監視與通訊 (M)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-evaluate')">風險評估 (E)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-develop')">管制與預防 (D)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-intervene')">介入與求救 (I)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-post')">災後復原</button>
     </div>
 
-    <!-- 內容區：① 初期作為 -->
     <div id="tab-initial" class="tab-content active">
-        <h2>抵達現場首要行動</h2>
+        <h2>監視與通訊 (Monitor & Comms) <span class="medic-tag">MEDIC - M</span></h2>
+        
+        <div class="info-box">
+            <strong>無線電通訊 3C 原則：</strong><br>
+            1. <strong>C</strong>onnect (連結/吸引注意)<br>
+            2. <strong>C</strong>onvey (傳達內容，遵守 CAN 原則)<br>
+            3. <strong>C</strong>onfirm (確認，簡要重複訊息)
+        </div>
+
         <ul class="checklist">
-            <li><input type="checkbox"> <span><strong>向指揮官(IC)報到：</strong>確認目前戰術目標(救援/防護/滅火)、整體計畫 (IAP) 與安全官專屬通訊頻道。</span></li>
-            <li><input type="checkbox"> <span><strong>執行 360 度勘查：</strong>親自繞行現場一圈，確認各面 (A/B/C/D) 狀況，回報指揮官未注意到的死角或潛在危害。</span></li>
-            <li><input type="checkbox"> <span><strong>評估水電瓦斯管制：</strong>確認台電、天然氣公司是否已到場或已切斷危險源。</span></li>
-            <li><input type="checkbox"> <span><strong>確認管制系統：</strong>確認人員管制看板 (Accountability) 已啟用，並劃定熱區 (Hot)、暖區 (Warm)、冷區 (Cold)。</span></li>
-            <li><input type="checkbox"> <span><strong>RIC 整備確認：</strong>確認快速救援小組 (RIC) 裝備齊全（備用氣瓶、破壞器材、搜救繩）且位於進入點附近待命。</span></li>
+            <li><input type="checkbox"> <span><strong>向指揮官(IC)報到：</strong>確認目前戰術目標與整體計畫 (IAP)。</span></li>
+            <li><input type="checkbox"> <span><strong>執行 360 度勘查：</strong>親自繞行現場，尋找潛在死角或危害能量（高壓電、太陽能板切斷變流器）。</span></li>
+            <li><input type="checkbox"> <span><strong>評估生存機率 (Survivability Profile)：</strong>若空間充滿黑火或地面溫度過高，研判無生存可能，應向 IC 建議轉為防禦性。</span></li>
+            <li><input type="checkbox"> <span><strong>確認 CAN 回報機制：</strong>監聽各線是否有回報 <strong>C</strong>ondition(狀態)、<strong>A</strong>ction(行動)、<strong>N</strong>eed(需求)。</span></li>
         </ul>
+
+        <div class="category-box">
+            <h3>💨 火煙深度判讀 (VVDC & Flow Path)</h3>
+            <ul class="bullet-list">
+                <li><strong>體積(V)與流速(V)：</strong>噴射狀的高速煙霧代表內部蓄熱極高。若新鮮空氣被快速吸入，代表處於「通風控制」極易極端成長。</li>
+                <li><strong>密度(D)與顏色(C)：</strong>濃稠不見光（黑火）含大量未燃燒氣體，具爆炸與閃燃危險。</li>
+                <li><strong>熱分層與閃燃前兆：</strong>注意煙層是否出現紊流 (Turbulent) 或閃火 (Ghosting)。</li>
+            </ul>
+        </div>
     </div>
 
-    <!-- 內容區：② 危害監控 -->
-    <div id="tab-hazard" class="tab-content">
-        <h2>現場危害指標監控</h2>
+    <div id="tab-evaluate" class="tab-content">
+        <h2>風險量化與評估 (Evaluate) <span class="medic-tag">MEDIC - E</span></h2>
         
-        <h3>🏢 建築結構風險</h3>
-        <ul class="bullet-list">
-            <li><strong>輕量化結構：</strong>確認是否為鐵皮屋、木造或輕鋼架結構，這類建築在受熱 5-10 分鐘後即有極高坍塌風險。</li>
-            <li><strong>倒塌前兆觀察：</strong>牆面出現裂縫或變形、屋頂下陷、門窗框扭曲、結構發出異常撕裂聲響、積水過多導致樓板超載。</li>
-        </ul>
-
-        <h3>💨 煙霧判讀 (VVDC)</h3>
-        <ul class="bullet-list">
-            <li><strong>體積 (Volume)：</strong>煙霧量大代表燃料多，持續增加代表火勢擴大。</li>
-            <li><strong>流速 (Velocity)：</strong>噴射狀的高速煙霧代表內部蓄熱極高，為閃燃或爆燃前兆。</li>
-            <li><strong>密度 (Density)：</strong>濃稠不見光的煙霧含有大量未燃燒氣體，極具爆炸危險。</li>
-            <li><strong>顏色 (Color)：</strong>棕色/黃色煙霧常為木材結構深度燃燒或化學物質；深黑色為碳氫化合物(塑膠/石油)燃燒。</li>
-        </ul>
-
-        <h3>⚠️ 特殊與外部危害</h3>
-        <ul class="bullet-list">
-            <li>留意掉落物、高壓電線、惡劣天候（強風導致火勢轉向）。</li>
-            <li>確認是否有危害物質 (HAZMAT) 標示，必要時建議指揮官擴大冷區半徑。</li>
-        </ul>
-    </div>
-
-    <!-- 內容區：③ 人員與醫療 -->
-    <div id="tab-personnel" class="tab-content">
-        <h2>人員安全與復健管理</h2>
-        
-        <h3>🛡️ 防護與空氣管理</h3>
-        <ul class="checklist">
-            <li><input type="checkbox"> <span>嚴格要求所有接近暖區/熱區人員，必須確實扣妥 SCBA 面罩與穿戴頭套，不得有肌膚外露。</span></li>
-            <li><input type="checkbox"> <span>監控入室小組的工作時間，落實「空氣管理」，確保人員預留足夠氣量撤出。</span></li>
-            <li><input type="checkbox"> <span>留意隊員是否出現「隧道視野」(Tunnel Vision)——過度專注滅火而忽略周遭危險。</span></li>
-        </ul>
-
-        <h3>🚑 復健區 (Rehab) 設立標準</h3>
-        <ul class="bullet-list">
-            <li><strong>位置：</strong>必須設在冷區、上風處，且避免救災車輛廢氣干擾。</li>
-            <li><strong>強制休息時機：</strong>消耗兩支 SCBA 氣瓶，或連續高強度作業達 40 分鐘，必須強制進入 Rehab 區休息至少 10-20 分鐘。</li>
-            <li><strong>生理監測指標：</strong>
-                <br>- 休息 20 分鐘後，心跳若仍大於 100 次/分，或體溫超過 38°C，禁止再次投入熱區。
-                <br>- 確保人員卸下沉重裝備，主動補充水分與電解質，並監控是否有中暑、熱衰竭前兆。
-            </li>
-        </ul>
-    </div>
-
-    <!-- 內容區：④ 緊急程序 -->
-    <div id="tab-emergency" class="tab-content">
-        <h2>緊急狀況處置原則</h2>
-        
-        <div class="warning-box">
-            <strong>⛔ 安全官絕對停止權 (Stop Work Authority)</strong>
-            當發現「立即危及生命健康 (IDLH)」之極端危險時（如屋頂即將坍塌、閃燃前兆）：
-            <ul class="bullet-list" style="margin-bottom: 0;">
-                <li><strong>ISO 有權繞過指揮官，直接下令停止該危險作業或撤出人員。</strong></li>
-                <li>發布指令後，必須立刻向指揮官(IC)回報處置原因。</li>
+        <div class="category-box">
+            <h3>🏗️ 建築物倒塌評估 (5-10分鐘法則)</h3>
+            <ul class="bullet-list">
+                <li><strong>輕量化結構：</strong>鐵皮屋、木造或輕鋼架結構，在受熱 <strong>5-10 分鐘</strong>後即有極高坍塌風險。</li>
+                <li><strong>倒塌前兆：</strong>牆面裂縫變形、屋頂下陷、門窗框扭曲、結構發出異常撕裂聲。</li>
             </ul>
         </div>
 
-        <h3>🚨 啟動緊急撤退 (Emergency Evacuation)</h3>
-        <ul class="checklist">
-            <li><input type="checkbox"> <span>確保無線電發送「緊急撤退」代碼或專屬長音提示。</span></li>
-            <li><input type="checkbox"> <span>確認現場測退提醒機制運行 (例如：現場車輛同步鳴按氣笛連續短鳴 3 次，每次 10 秒，依規定)。</span></li>
-            <li><input type="checkbox"> <span>撤退後立即協助 IC 執行全員清點 (PAR)。</span></li>
-        </ul>
+        <div class="category-box" style="border-color: #93c5fd;">
+            <h3 style="color: var(--accent-blue);">🌊 水域與水文判讀 (Hydrology)</h3>
+            <ul class="bullet-list">
+                <li><strong>過濾障礙物 (Strainer)：</strong>如倒木、攔截網、消波塊。水可流過但人體無法通過，是激流中最致命的殺手，須將周遭列為絕對禁區。</li>
+                <li><strong>水躍 / 沸騰線 (Hydraulic / Boil)：</strong>水流越過攔沙壩或落差，產生的強大下壓與倒捲流（微笑流），極易造成人員或舟艇翻覆受困。</li>
+                <li><strong>障礙 V 字流 (Upstream V)：</strong>水流遇障礙物向兩側分開，尖端朝向上游，代表水下有暗礁或淺灘。</li>
+            </ul>
+        </div>
 
-        <h3>🆘 Mayday (求救) 狀況配合</h3>
-        <ul class="bullet-list">
-            <li>當無線電傳出 Mayday 時，ISO 應協助指揮官維持通訊紀律（淨空主頻道）。</li>
-            <li>協調備用 RIC 小組遞補原先出動的 RIC 位置。</li>
-            <li>監控救援行動的風險，避免引發「救援者效應」(過多人員未經管制衝入火場救援)。</li>
-        </ul>
+        <div class="category-box" style="border-color: #0891b2;">
+            <h3 style="color: var(--accent-cyan);">🤿 公共安全潛水 (PSD) 危害評估</h3>
+            <ul class="bullet-list">
+                <li><strong>水質污染風險 (Contamination)：</strong>多數搜救現場屬「黑水 (Black Water)」或工業廢水，需嚴格評估生化危害、油汙及水下尖銳廢棄物。未配戴全面罩(FFM)及防護裝備前，禁止以一般休閒水肺入水。</li>
+                <li><strong>零能見度 (Zero Visibility)：</strong>水底泥沙極易因擾動揚起，容易發生管線纏繞 (Entanglement) 或幽閉恐懼迷失。</li>
+                <li><strong>極端環境因子：</strong>評估水溫（失溫風險）與流速（超過 1 節流速不建議直接下潛，需採其他救援方案）。</li>
+            </ul>
+        </div>
+
+        <div class="category-box" style="border-color: #fdba74;">
+            <h3 style="color: var(--accent-orange);">🧮 SPE 風險量化評估矩陣</h3>
+            <p style="font-size: 0.9rem; margin-top: 0;">將 <strong>嚴重性(S) × 機率(P) × 暴露威脅(E)</strong> ＝ 總分</p>
+            <table class="tool-table">
+                <tr>
+                    <th>S 嚴重性 (1-5)</th>
+                    <th>P 機率 (1-5)</th>
+                    <th>E 暴露 (1-4)</th>
+                </tr>
+                <tr>
+                    <td>1: 輕微傷害<br>5: 死亡威脅</td>
+                    <td>1: 極低發生率<br>5: 必然發生</td>
+                    <td>1: 受控保護下<br>4: 完全失控</td>
+                </tr>
+            </table>
+            <ul class="bullet-list" style="margin-bottom:0;">
+                <li><strong>1-50 分：</strong> 可接受風險。</li>
+                <li><strong>51-80 分：</strong> 風險邊緣，需密切監控並發展預防措施。</li>
+                <li><strong>81-100 分：</strong> 不可接受風險（NO-GO），建議立即撤出。</li>
+            </ul>
+        </div>
     </div>
 
-    <!-- 內容區：⑤ 災後復原 -->
+    <div id="tab-develop" class="tab-content">
+        <h2>發展預防與管制 (Develop) <span class="medic-tag">MEDIC - D</span></h2>
+        
+        <div class="category-box">
+            <h3>🚧 現場區域劃設標準 (Control Zones)</h3>
+            <ul class="bullet-list">
+                <li><strong>🔴 禁止進入區 (No-Entry Zone)：</strong>有倒塌風險時，管制範圍 <strong>至少為建築物高度的 1.5 倍以上</strong>。</li>
+                <li><strong>🟠 熱區 (Hot Zone)：</strong>作業區，必須穿戴完整個人防護裝備 (PPE) 與 SCBA。</li>
+                <li><strong>🟡 暖區 (Warm Zone)：</strong>除汙站 (Decon) 與 快速救援小組 (RIC/RIT) 集結區。</li>
+                <li><strong>🟢 冷區 (Cold Zone)：</strong>指揮站、後勤與 Rehab 休息區，禁止民眾進入。</li>
+            </ul>
+        </div>
+
+        <div class="category-box" style="border-color: #0891b2;">
+            <h3 style="color: var(--accent-cyan);">🦺 公安潛水 (PSD) 岸上與入水管制</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>嚴禁放生潛水 (No Free Swimming)：</strong>所有入水者必須有信號繩 (Tether) 牽引，岸上必須配置專責的「信號繩控員 (Tender)」負責通訊與引導。</span></li>
+                <li><input type="checkbox"> <span><strong>備用潛水員 90% 整備：</strong>岸上必須配置一名備用救援潛水員 (Standby Diver)，且必須穿戴完畢（僅差面罩未戴上），確保能於 30 秒內入水救援。</span></li>
+                <li><input type="checkbox"> <span><strong>氣量管理 (三分之一法則)：</strong>嚴格執行 1/3 去程、1/3 回程、1/3 備用的空氣管理原則；水面人員需定時記錄深度與殘壓。</span></li>
+                <li><input type="checkbox"> <span><strong>強制除汙站 (Decon)：</strong>暖區必須提前設立潛水員專用除汙站。潛水員上岸後，必須先進行沖洗除汙，確認無污染後才能卸下全面罩與調節器。</span></li>
+                <li><input type="checkbox"> <span><strong>裝備絕對原則：</strong>水域熱區（水邊 3 公尺內）嚴禁穿著笨重的消防衣褲；所有岸上支援人員均需穿著激流救生衣 (PFD)。</span></li>
+            </ul>
+        </div>
+
+        <div class="category-box">
+            <h3>🚑 消防員後勤照護 (REHAB)</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span>確保 Rehab 區位於冷區、上風處且環境安靜。</span></li>
+                <li><input type="checkbox"> <span><strong>輪替原則 (20法則)：</strong>消耗 1 支氣瓶或連續高強度作業達 20-40 分鐘，強制休息至少 10-20 分鐘。</span></li>
+            </ul>
+            <div class="info-box" style="margin-top: 10px;">
+                <strong>生理監測阻擋指標：</strong><br>
+                休息 20 分鐘後，若 <strong>心跳仍 > 100 次/分</strong> 或 <strong>體溫 > 38°C</strong>，嚴禁該員再次投入熱區作業。
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-intervene" class="tab-content">
+        <h2>介入與緊急程序 (Intervene) <span class="medic-tag">MEDIC - I</span></h2>
+        
+        <div class="category-box">
+            <h3>⚠️ 安全官的介入權限</h3>
+            <ul class="bullet-list">
+                <li><strong>軟性介入 (Soft Intervention)：</strong>第一選擇。針對非立即性威脅，透過對話引發人員的「情境意識(SA)」。(例：「你有注意到煙色變了嗎？」)</li>
+                <li><strong>硬性介入 (Hard Intervention)：</strong>發現 <strong>立即危及生命健康 (IDLH)</strong> 之極端危險時，ISO 擁有絕對停止權 (Stop Work Authority)，可直接下令停止作業並撤出。</li>
+            </ul>
+        </div>
+
+        <div class="category-box" style="border-color: #0891b2;">
+            <h3 style="color: var(--accent-cyan);">🚨 水下 MAYDAY (潛水緊急狀況)</h3>
+            <ul class="bullet-list">
+                <li><strong>啟動時機：</strong>主潛水員發送連續且急促的拉扯信號（或有線通訊喊 MAYDAY）、水面失去氣泡追蹤，或超過預定時間且繩索無回應。</li>
+                <li><strong>應變處置：</strong>安全官確認後，立即協同指揮官下令備用潛水員 (Standby Diver) 沿著主信號繩 (Tether) 下潛執行救援，並同步呼叫 EMS 於岸邊待命。</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>🆘 建築物 MAYDAY (GRAB LIVES)</strong>
+            當發生迷失、失去方向、受困時，安全官應透過無線電提醒受困者執行：
+            <ul class="bullet-list" style="margin-bottom: 0; margin-top: 5px;">
+                <li><strong>G</strong>auge: 看壓力錶 (確認殘壓)</li>
+                <li><strong>R</strong>adio: 喊 MAYDAY 通報</li>
+                <li><strong>A</strong>ctivate Pass: 啟動救命器</li>
+                <li><strong>B</strong>reathing: 控制呼吸 (節省空氣)</li>
+                <li><strong>L</strong>ow: 保持低姿勢</li>
+                <li><strong>I</strong>lluminate: 打開照明燈 (45度角)</li>
+                <li><strong>V</strong>olume: 製造聲響</li>
+                <li><strong>E</strong>xit: 尋找出口</li>
+                <li><strong>S</strong>hield airway: 保護呼吸道</li>
+            </ul>
+        </div>
+    </div>
+
     <div id="tab-post" class="tab-content">
-        <h2>任務結束與災後作業</h2>
+        <h2>任務結束與災後作業 <span class="medic-tag">Post-Incident</span></h2>
         <ul class="checklist">
-            <li><input type="checkbox"> <span><strong>人員清點 (PAR)：</strong>所有作業結束後，確保現場所有單位完成人員清點。</span></li>
-            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>監督人員在卸下 SCBA 面罩前，完成消防衣的初步清洗，降低致癌微粒附著。</span></li>
-            <li><input type="checkbox"> <span><strong>裝備打包安全：</strong>提醒人員將受汙染的消防衣與一般衣物/車廂隔離。</span></li>
-            <li><input type="checkbox"> <span><strong>收集資訊：</strong>記錄本次救災的優良處置與安全缺失。</span></li>
-            <li><input type="checkbox"> <span><strong>災後檢討 (AAR)：</strong>參與災後檢討會議，以安全官角度提出改善建議。</span></li>
+            <li><input type="checkbox"> <span><strong>全員清點 (PAR)：</strong>撤退或所有作業結束後，確保現場所有單位完成人員清點回報。</span></li>
+            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>監督人員在卸下面罩前，完成消防衣(或乾式潛水衣)的初步清洗，降低致癌物或生化污染附著。</span></li>
+            <li><input type="checkbox"> <span><strong>裝備打包安全：</strong>提醒人員將受汙染裝備（如接觸過黑水的潛水器材）與一般衣物/車廂隔離，放入專用防漏袋。</span></li>
+            <li><input type="checkbox"> <span><strong>收集資訊與檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，並於災後檢討會議中提出改善建議。</span></li>
         </ul>
     </div>
 
     <div class="footer">
-        本指引內容參考國內外消防安全官 (ISO) 訓練準則與 ICS 系統<br>
-        © 2026 現場安全查核系統
+        本指引內容參考消防署安全官 (ISO) 與公共安全潛水 (PSD) 訓練準則<br>
+        © 2026 現場安全查核系統 | 請參酌現場狀況調整
     </div>
 
 </div>
 
-<!-- 分頁切換腳本 -->
 <script>
     function openTab(evt, tabId) {
-        // 隱藏所有分頁內容
         var tabContents = document.getElementsByClassName("tab-content");
         for (var i = 0; i < tabContents.length; i++) {
             tabContents[i].classList.remove("active");
         }
 
-        // 移除所有按鈕的 active 狀態
         var tabBtns = document.getElementsByClassName("tab-btn");
         for (var i = 0; i < tabBtns.length; i++) {
             tabBtns[i].classList.remove("active");
         }
 
-        // 顯示被點擊的分頁內容
         document.getElementById(tabId).classList.add("active");
-        
-        // 將被點擊的按鈕設為 active
         evt.currentTarget.classList.add("active");
     }
 </script>
