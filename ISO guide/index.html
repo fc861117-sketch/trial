@@ -153,8 +153,15 @@
             padding-bottom: 5px;
             border-bottom: 2px solid #cbd5e1;
             font-size: 1.1rem;
-            color: var(--accent-red);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        .cat-fire h3 { color: var(--accent-red); border-color: #fca5a5; }
+        .cat-rescue h3 { color: var(--accent-orange); border-color: #fdba74; }
+        .cat-water h3 { color: var(--accent-cyan); border-color: #67e8f9; }
+        .cat-universal h3 { color: var(--primary-color); border-color: #cbd5e1; }
 
         h4 {
             color: var(--secondary-color);
@@ -239,6 +246,7 @@
             border-collapse: collapse;
             margin-bottom: 1rem;
             font-size: 0.9rem;
+            background: white;
         }
         .tool-table th, .tool-table td {
             border: 1px solid #cbd5e1;
@@ -274,36 +282,49 @@
 <div class="container">
     
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="openTab(event, 'tab-initial')">監視與通訊 (M)</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-evaluate')">風險評估 (E)</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-develop')">管制與預防 (D)</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-intervene')">介入與求救 (I)</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab-post')">災後復原</button>
+        <button class="tab-btn active" onclick="openTab(event, 'tab-initial')">監視 (M)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-evaluate')">評估 (E)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-develop')">管制 (D)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-intervene')">介入 (I)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-post')">復原</button>
     </div>
 
     <div id="tab-initial" class="tab-content active">
         <h2>監視與通訊 (Monitor & Comms) <span class="medic-tag">MEDIC - M</span></h2>
         
-        <div class="info-box">
-            <strong>無線電通訊 3C 原則：</strong><br>
-            1. <strong>C</strong>onnect (連結/吸引注意)<br>
-            2. <strong>C</strong>onvey (傳達內容，遵守 CAN 原則)<br>
-            3. <strong>C</strong>onfirm (確認，簡要重複訊息)
+        <div class="category-box cat-universal">
+            <h3>🌐 通用初期作為與通訊</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>向指揮官報到：</strong>確認戰術目標 (IAP) 與安全官專屬頻道。落實 <strong>3C 原則</strong> (Connect連結, Convey傳達, Confirm確認)。</span></li>
+                <li><input type="checkbox"> <span><strong>執行 360 度勘查：</strong>親自繞行現場，尋找潛在死角或危害能量。</span></li>
+                <li><input type="checkbox"> <span><strong>確認 CAN 回報機制：</strong>監聽各線是否有回報 Condition(狀態)、Action(行動)、Need(需求)。</span></li>
+            </ul>
         </div>
 
-        <ul class="checklist">
-            <li><input type="checkbox"> <span><strong>向指揮官(IC)報到：</strong>確認目前戰術目標與整體計畫 (IAP)。</span></li>
-            <li><input type="checkbox"> <span><strong>執行 360 度勘查：</strong>親自繞行現場，尋找潛在死角或危害能量（高壓電、太陽能板切斷變流器）。</span></li>
-            <li><input type="checkbox"> <span><strong>評估生存機率 (Survivability Profile)：</strong>若空間充滿黑火或地面溫度過高，研判無生存可能，應向 IC 建議轉為防禦性。</span></li>
-            <li><input type="checkbox"> <span><strong>確認 CAN 回報機制：</strong>監聽各線是否有回報 <strong>C</strong>ondition(狀態)、<strong>A</strong>ction(行動)、<strong>N</strong>eed(需求)。</span></li>
-        </ul>
-
-        <div class="category-box">
-            <h3>💨 火煙深度判讀 (VVDC & Flow Path)</h3>
+        <div class="category-box cat-fire">
+            <h3>🔥 火災與化學災害 (Fire & HazMat)</h3>
             <ul class="bullet-list">
-                <li><strong>體積(V)與流速(V)：</strong>噴射狀的高速煙霧代表內部蓄熱極高。若新鮮空氣被快速吸入，代表處於「通風控制」極易極端成長。</li>
-                <li><strong>密度(D)與顏色(C)：</strong>濃稠不見光（黑火）含大量未燃燒氣體，具爆炸與閃燃危險。</li>
-                <li><strong>熱分層與閃燃前兆：</strong>注意煙層是否出現紊流 (Turbulent) 或閃火 (Ghosting)。</li>
+                <li><strong>火煙深度判讀 (VVDC)：</strong>觀察煙霧的體積(V)、流速(V)、密度(D)與顏色(C)。若出現噴射狀高速煙霧或濃稠黑火，代表內部蓄熱極高。</li>
+                <li><strong>氣流路徑 (Flow Path)：</strong>觀察新鮮空氣從何處被吸入，判斷火勢是否處於「通風控制」階段。</li>
+                <li><strong>化災標示：</strong>尋找 ERG 危害辨識卡或 GHS 標示，監視風向是否改變。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-rescue">
+            <h3>🚗 車禍與車輛救援 (Traffic Rescue)</h3>
+            <ul class="bullet-list">
+                <li><strong>現場車流監控：</strong>監視來車車速與動線，確認防撞屏障 (Block) 是否發揮作用。</li>
+                <li><strong>車輛動能檢視：</strong>監視事故車輛是否有滑動、翻覆傾向，留意漏油狀況。</li>
+                <li><strong>特殊能源辨識：</strong>觀察車輛是否有 EV/HEV (電動/油電) 標章，尋找高壓電橘色線束位置。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-water">
+            <h3>🌊 水域與潛水救援 (Water & PSD)</h3>
+            <ul class="bullet-list">
+                <li><strong>水文與天候監視：</strong>監視上游是否有雷雨胞、水色是否混濁變深 (溪水暴漲前兆)。</li>
+                <li><strong>漂流物監控：</strong>指派上游觀測員 (Spotter) 專責監視並提早通報大型漂流物。</li>
+                <li><strong>氣泡與信號監控：</strong>潛水作業時，死守岸上信號繩 (Tether) 並持續監視水面氣泡走向。</li>
             </ul>
         </div>
     </div>
@@ -311,124 +332,115 @@
     <div id="tab-evaluate" class="tab-content">
         <h2>風險量化與評估 (Evaluate) <span class="medic-tag">MEDIC - E</span></h2>
         
-        <div class="category-box">
-            <h3>🏗️ 建築物倒塌評估 (5-10分鐘法則)</h3>
+        <div class="category-box cat-universal">
+            <h3>🧮 通用風險量化工具</h3>
+            <h4>1. VTS 戰術決策模式</h4>
             <ul class="bullet-list">
-                <li><strong>輕量化結構：</strong>鐵皮屋、木造或輕鋼架結構，在受熱 <strong>5-10 分鐘</strong>後即有極高坍塌風險。</li>
-                <li><strong>倒塌前兆：</strong>牆面裂縫變形、屋頂下陷、門窗框扭曲、結構發出異常撕裂聲。</li>
+                <li><strong>Value (價值)：</strong>現場有值得冒險的人命或財產嗎？(無生還可能 = 不可接受風險)</li>
+                <li><strong>Time (時間)：</strong>建築/氣瓶能撐多久？極端危害發生前剩多少時間？</li>
+                <li><strong>Size (規模)：</strong>目前資源足以壓制災害規模嗎？</li>
             </ul>
-        </div>
-
-        <div class="category-box" style="border-color: #93c5fd;">
-            <h3 style="color: var(--accent-blue);">🌊 水域與水文判讀 (Hydrology)</h3>
-            <ul class="bullet-list">
-                <li><strong>過濾障礙物 (Strainer)：</strong>如倒木、攔截網、消波塊。水可流過但人體無法通過，是激流中最致命的殺手，須將周遭列為絕對禁區。</li>
-                <li><strong>水躍 / 沸騰線 (Hydraulic / Boil)：</strong>水流越過攔沙壩或落差，產生的強大下壓與倒捲流（微笑流），極易造成人員或舟艇翻覆受困。</li>
-                <li><strong>障礙 V 字流 (Upstream V)：</strong>水流遇障礙物向兩側分開，尖端朝向上游，代表水下有暗礁或淺灘。</li>
-            </ul>
-        </div>
-
-        <div class="category-box" style="border-color: #0891b2;">
-            <h3 style="color: var(--accent-cyan);">🤿 公共安全潛水 (PSD) 危害評估</h3>
-            <ul class="bullet-list">
-                <li><strong>水質污染風險 (Contamination)：</strong>多數搜救現場屬「黑水 (Black Water)」或工業廢水，需嚴格評估生化危害、油汙及水下尖銳廢棄物。未配戴全面罩(FFM)及防護裝備前，禁止以一般休閒水肺入水。</li>
-                <li><strong>零能見度 (Zero Visibility)：</strong>水底泥沙極易因擾動揚起，容易發生管線纏繞 (Entanglement) 或幽閉恐懼迷失。</li>
-                <li><strong>極端環境因子：</strong>評估水溫（失溫風險）與流速（超過 1 節流速不建議直接下潛，需採其他救援方案）。</li>
-            </ul>
-        </div>
-
-        <div class="category-box" style="border-color: #fdba74;">
-            <h3 style="color: var(--accent-orange);">🧮 SPE 風險量化評估矩陣</h3>
-            <p style="font-size: 0.9rem; margin-top: 0;">將 <strong>嚴重性(S) × 機率(P) × 暴露威脅(E)</strong> ＝ 總分</p>
+            <h4>2. SPE 風險評估矩陣 (S×P×E)</h4>
             <table class="tool-table">
-                <tr>
-                    <th>S 嚴重性 (1-5)</th>
-                    <th>P 機率 (1-5)</th>
-                    <th>E 暴露 (1-4)</th>
-                </tr>
-                <tr>
-                    <td>1: 輕微傷害<br>5: 死亡威脅</td>
-                    <td>1: 極低發生率<br>5: 必然發生</td>
-                    <td>1: 受控保護下<br>4: 完全失控</td>
-                </tr>
+                <tr><th>S 嚴重性(1-5)</th><th>P 機率(1-5)</th><th>E 暴露(1-4)</th></tr>
+                <tr><td>1:輕傷 ~ 5:死亡</td><td>1:極低 ~ 5:必然</td><td>1:受控 ~ 4:失控</td></tr>
             </table>
-            <ul class="bullet-list" style="margin-bottom:0;">
-                <li><strong>1-50 分：</strong> 可接受風險。</li>
-                <li><strong>51-80 分：</strong> 風險邊緣，需密切監控並發展預防措施。</li>
-                <li><strong>81-100 分：</strong> 不可接受風險（NO-GO），建議立即撤出。</li>
+            <p style="font-size:0.9rem; margin:5px 0 0 0;"><em>* 大於 80 分為不可接受風險 (NO-GO)，應建議撤出。</em></p>
+        </div>
+
+        <div class="category-box cat-fire">
+            <h3>🔥 火災：倒塌與極端行為評估</h3>
+            <ul class="bullet-list">
+                <li><strong>5-10分鐘法則：</strong>輕量化結構(鐵皮/木造)受熱 5-10 分鐘後極具坍塌風險。觀察牆面裂縫、屋頂下陷等前兆。</li>
+                <li><strong>生存機率評估 (Survivability)：</strong>若空間充滿紊流黑火或地面溫度超過人體極限 (約149°C)，研判無生存可能，建議轉為防禦性。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-rescue">
+            <h3>🚗 車禍：脫困與熱失控風險</h3>
+            <ul class="bullet-list">
+                <li><strong>氣囊與爆發物：</strong>評估未爆氣囊風險（方向盤5吋、儀表板10吋、側氣簾20吋安全距離）。</li>
+                <li><strong>電動車熱失控 (Thermal Runaway)：</strong>使用熱顯像儀 (TIC) 評估電池底盤溫度，若持續飆高需預估龐大水源需求或準備防火毯。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-water">
+            <h3>🌊 水域：水文致命點與污染評估</h3>
+            <ul class="bullet-list">
+                <li><strong>致命水文評估：</strong>辨識過濾障礙物 (Strainer)、水躍/沸騰線 (Boil)、掏空地形 (Undercut)，將該區列為絕對禁區。</li>
+                <li><strong>PSD 污染與能見度：</strong>評估水質是否為化學/工業污染的「黑水」，以及零能見度下管線纏繞 (Entanglement) 的機率。</li>
             </ul>
         </div>
     </div>
 
     <div id="tab-develop" class="tab-content">
         <h2>發展預防與管制 (Develop) <span class="medic-tag">MEDIC - D</span></h2>
-        
-        <div class="category-box">
-            <h3>🚧 現場區域劃設標準 (Control Zones)</h3>
-            <ul class="bullet-list">
-                <li><strong>🔴 禁止進入區 (No-Entry Zone)：</strong>有倒塌風險時，管制範圍 <strong>至少為建築物高度的 1.5 倍以上</strong>。</li>
-                <li><strong>🟠 熱區 (Hot Zone)：</strong>作業區，必須穿戴完整個人防護裝備 (PPE) 與 SCBA。</li>
-                <li><strong>🟡 暖區 (Warm Zone)：</strong>除汙站 (Decon) 與 快速救援小組 (RIC/RIT) 集結區。</li>
-                <li><strong>🟢 冷區 (Cold Zone)：</strong>指揮站、後勤與 Rehab 休息區，禁止民眾進入。</li>
-            </ul>
-        </div>
 
-        <div class="category-box" style="border-color: #0891b2;">
-            <h3 style="color: var(--accent-cyan);">🦺 公安潛水 (PSD) 岸上與入水管制</h3>
+        <div class="category-box cat-universal">
+            <h3>🚑 消防員後勤照護 (REHAB) 絕對標準</h3>
             <ul class="checklist">
-                <li><input type="checkbox"> <span><strong>嚴禁放生潛水 (No Free Swimming)：</strong>所有入水者必須有信號繩 (Tether) 牽引，岸上必須配置專責的「信號繩控員 (Tender)」負責通訊與引導。</span></li>
-                <li><input type="checkbox"> <span><strong>備用潛水員 90% 整備：</strong>岸上必須配置一名備用救援潛水員 (Standby Diver)，且必須穿戴完畢（僅差面罩未戴上），確保能於 30 秒內入水救援。</span></li>
-                <li><input type="checkbox"> <span><strong>氣量管理 (三分之一法則)：</strong>嚴格執行 1/3 去程、1/3 回程、1/3 備用的空氣管理原則；水面人員需定時記錄深度與殘壓。</span></li>
-                <li><input type="checkbox"> <span><strong>強制除汙站 (Decon)：</strong>暖區必須提前設立潛水員專用除汙站。潛水員上岸後，必須先進行沖洗除汙，確認無污染後才能卸下全面罩與調節器。</span></li>
-                <li><input type="checkbox"> <span><strong>裝備絕對原則：</strong>水域熱區（水邊 3 公尺內）嚴禁穿著笨重的消防衣褲；所有岸上支援人員均需穿著激流救生衣 (PFD)。</span></li>
-            </ul>
-        </div>
-
-        <div class="category-box">
-            <h3>🚑 消防員後勤照護 (REHAB)</h3>
-            <ul class="checklist">
-                <li><input type="checkbox"> <span>確保 Rehab 區位於冷區、上風處且環境安靜。</span></li>
-                <li><input type="checkbox"> <span><strong>輪替原則 (20法則)：</strong>消耗 1 支氣瓶或連續高強度作業達 20-40 分鐘，強制休息至少 10-20 分鐘。</span></li>
+                <li><input type="checkbox"> <span>Rehab 區設於冷區、上風處且環境安靜。</span></li>
+                <li><input type="checkbox"> <span><strong>20法則：</strong>消耗 1 支氣瓶或連續高強度作業 20-40 分鐘，強制休息 10-20 分鐘。</span></li>
             </ul>
             <div class="info-box" style="margin-top: 10px;">
                 <strong>生理監測阻擋指標：</strong><br>
                 休息 20 分鐘後，若 <strong>心跳仍 > 100 次/分</strong> 或 <strong>體溫 > 38°C</strong>，嚴禁該員再次投入熱區作業。
             </div>
         </div>
+        
+        <div class="category-box cat-fire">
+            <h3>🔥 火災與化災管制</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>1.5 倍高撤退區：</strong>有倒塌風險時，管制範圍至少為建築高度的 1.5 倍以上。</span></li>
+                <li><input type="checkbox"> <span><strong>除汙與 RIC：</strong>暖區確實設立除汙站 (Decon) 與快速救援小組 (RIC/RIT) 待命區。</span></li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-rescue">
+            <h3>🚗 車禍交管與穩固</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>消防車防護：</strong>確認大型車輛以 45 度角停放於事故上游做為防撞屏障。</span></li>
+                <li><input type="checkbox"> <span><strong>斷電與穩固：</strong>確認車輛已確實使用輪擋/枕木穩固，且電瓶已斷電 (先負後正)。</span></li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-water">
+            <h3>🌊 水域與 PSD 潛水管制</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>嚴禁消防衣：</strong>熱區（水邊 3 公尺內）絕對禁止穿著消防衣褲，強制穿著激流救生衣 (PFD)。</span></li>
+                <li><input type="checkbox"> <span><strong>備用潛水員 90% 整備：</strong>岸上必須有一名備用救援潛水員 (Standby Diver) 著裝完畢待命。</span></li>
+                <li><input type="checkbox"> <span><strong>嚴禁放生潛水：</strong>所有入水搜救者必須有信號繩 (Tether) 牽引，岸上配置控繩員。</span></li>
+                <li><input type="checkbox"> <span><strong>三分之一氣量管理：</strong>嚴格執行 1/3 去程、1/3 回程、1/3 備用的原則。</span></li>
+            </ul>
+        </div>
     </div>
 
     <div id="tab-intervene" class="tab-content">
         <h2>介入與緊急程序 (Intervene) <span class="medic-tag">MEDIC - I</span></h2>
         
-        <div class="category-box">
-            <h3>⚠️ 安全官的介入權限</h3>
+        <div class="category-box cat-universal">
+            <h3>⚠️ 安全官介入權限</h3>
             <ul class="bullet-list">
-                <li><strong>軟性介入 (Soft Intervention)：</strong>第一選擇。針對非立即性威脅，透過對話引發人員的「情境意識(SA)」。(例：「你有注意到煙色變了嗎？」)</li>
-                <li><strong>硬性介入 (Hard Intervention)：</strong>發現 <strong>立即危及生命健康 (IDLH)</strong> 之極端危險時，ISO 擁有絕對停止權 (Stop Work Authority)，可直接下令停止作業並撤出。</li>
+                <li><strong>軟性介入 (Soft)：</strong>對話引導情境意識 (例：「你有注意到煙色變了嗎？」)。</li>
+                <li><strong>硬性介入 (Hard)：</strong>遇立即危及生命健康 (IDLH) 時，擁有<strong>絕對停止權</strong>，可直接下令撤退，事後回報 IC。</li>
             </ul>
         </div>
 
-        <div class="category-box" style="border-color: #0891b2;">
-            <h3 style="color: var(--accent-cyan);">🚨 水下 MAYDAY (潛水緊急狀況)</h3>
-            <ul class="bullet-list">
-                <li><strong>啟動時機：</strong>主潛水員發送連續且急促的拉扯信號（或有線通訊喊 MAYDAY）、水面失去氣泡追蹤，或超過預定時間且繩索無回應。</li>
-                <li><strong>應變處置：</strong>安全官確認後，立即協同指揮官下令備用潛水員 (Standby Diver) 沿著主信號繩 (Tether) 下潛執行救援，並同步呼叫 EMS 於岸邊待命。</li>
+        <div class="category-box cat-fire">
+            <h3>🚨 火場 MAYDAY (GRAB LIVES)</h3>
+            <p style="font-size: 0.9rem; margin-top: 0;">當人員迷失受困，安全官應透過無線電引導執行：</p>
+            <ul class="bullet-list" style="margin-bottom: 0;">
+                <li><strong>G</strong>auge: 看壓力錶 | <strong>R</strong>adio: 喊 MAYDAY | <strong>A</strong>ctivate Pass: 啟動救命器</li>
+                <li><strong>B</strong>reathing: 控制呼吸 | <strong>L</strong>ow: 保持低姿勢 | <strong>I</strong>lluminate: 打開照明燈</li>
+                <li><strong>V</strong>olume: 製造聲響 | <strong>E</strong>xit: 尋找出口 | <strong>S</strong>hield airway: 保護呼吸道</li>
             </ul>
         </div>
 
-        <div class="warning-box">
-            <strong>🆘 建築物 MAYDAY (GRAB LIVES)</strong>
-            當發生迷失、失去方向、受困時，安全官應透過無線電提醒受困者執行：
-            <ul class="bullet-list" style="margin-bottom: 0; margin-top: 5px;">
-                <li><strong>G</strong>auge: 看壓力錶 (確認殘壓)</li>
-                <li><strong>R</strong>adio: 喊 MAYDAY 通報</li>
-                <li><strong>A</strong>ctivate Pass: 啟動救命器</li>
-                <li><strong>B</strong>reathing: 控制呼吸 (節省空氣)</li>
-                <li><strong>L</strong>ow: 保持低姿勢</li>
-                <li><strong>I</strong>lluminate: 打開照明燈 (45度角)</li>
-                <li><strong>V</strong>olume: 製造聲響</li>
-                <li><strong>E</strong>xit: 尋找出口</li>
-                <li><strong>S</strong>hield airway: 保護呼吸道</li>
+        <div class="category-box cat-water">
+            <h3>🚨 潛水 MAYDAY (水下緊急狀況)</h3>
+            <ul class="bullet-list" style="margin-bottom: 0;">
+                <li><strong>啟動時機：</strong>信號繩連續急促拉扯、水面失去氣泡追蹤、超過預定時間無回應。</li>
+                <li><strong>應變處置：</strong>協同指揮官下令備用潛水員 (Standby Diver) 沿主信號繩下潛救援，同步呼叫 EMS 岸邊待命。</li>
             </ul>
         </div>
     </div>
@@ -436,16 +448,16 @@
     <div id="tab-post" class="tab-content">
         <h2>任務結束與災後作業 <span class="medic-tag">Post-Incident</span></h2>
         <ul class="checklist">
-            <li><input type="checkbox"> <span><strong>全員清點 (PAR)：</strong>撤退或所有作業結束後，確保現場所有單位完成人員清點回報。</span></li>
-            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>監督人員在卸下面罩前，完成消防衣(或乾式潛水衣)的初步清洗，降低致癌物或生化污染附著。</span></li>
-            <li><input type="checkbox"> <span><strong>裝備打包安全：</strong>提醒人員將受汙染裝備（如接觸過黑水的潛水器材）與一般衣物/車廂隔離，放入專用防漏袋。</span></li>
-            <li><input type="checkbox"> <span><strong>收集資訊與檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，並於災後檢討會議中提出改善建議。</span></li>
+            <li><input type="checkbox"> <span><strong>全員清點 (PAR)：</strong>所有作業結束後，確保現場各單位完成人員清點。</span></li>
+            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>卸下面罩前，完成消防衣(或乾式潛水衣)的初步沖洗，降低致癌物或生化污染附著。</span></li>
+            <li><input type="checkbox"> <span><strong>裝備隔離：</strong>受汙染裝備（化災、火場碳微粒、黑水潛水器材）應放入專用防漏袋，與一般衣物及車廂隔離。</span></li>
+            <li><input type="checkbox"> <span><strong>災後檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，並於會議中提出改善建議。</span></li>
         </ul>
     </div>
 
     <div class="footer">
-        本指引內容參考消防署安全官 (ISO) 與公共安全潛水 (PSD) 訓練準則<br>
-        © 2026 現場安全查核系統 | 請參酌現場狀況調整
+        本指引內容參考消防署安全官 (ISO) 訓練準則與 MEDIC 管理系統<br>
+        © 2026 現場安全查核系統 | 湖口消防分隊 格式建議
     </div>
 
 </div>
@@ -467,5 +479,7 @@
     }
 </script>
 
+</body>
+</html>
 </body>
 </html>
