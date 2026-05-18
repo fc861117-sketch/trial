@@ -1045,13 +1045,32 @@ if (savedUserName) {
 
 // 2. 判斷是否有尚未離開的專案
 if (savedProject && savedUserName && db[savedProject]) {
-    // 發現記憶！直接在背景自動載入專案，跳過首頁
-    openProject(savedProject, 'edit', null, true).then(() => {
-        // 載入完成後，切換回休眠前所在的子分頁 (簡報表或MEDIC)
-        if (savedTab !== 'page-briefing') {
-            switchTab(savedTab);
+    // 🌟 步驟 A：鎖定整個網頁的點擊功能，並跳出「載入中」提示
+    document.body.style.pointerEvents = 'none';
+    showToast(`🔄 正在為您恢復專案：${savedProject}...`, "info");
+
+    // 🌟 步驟 B：設定 500 毫秒的延遲，讓瀏覽器有時間把提示框畫出來
+    setTimeout(() => {
+        try {
+            // 執行背景載入專案
+            openProject(savedProject, 'edit', null, true);
+            
+            // 載入完成後，切換回休眠前所在的子分頁
+            if (savedTab !== 'page-briefing') {
+                switchTab(savedTab);
+            }
+            
+            // 🌟 步驟 C：載入完畢，解鎖網頁點擊功能，並跳出「成功」提示
+            document.body.style.pointerEvents = 'auto';
+            showToast("✅ 已成功接續先前的作業！", "success");
+
+        } catch (error) {
+            // 防呆機制：萬一載入過程發生意外錯誤，強制解鎖畫面並回到首頁
+            document.body.style.pointerEvents = 'auto';
+            renderHome();
         }
-    });
+    }, 500); 
+
 } else {
     // 沒有記憶，才正常顯示首頁列表
     renderHome();
