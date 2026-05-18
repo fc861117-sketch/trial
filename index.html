@@ -774,6 +774,12 @@ async function executeFinishCase() {
                     btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
                 }
             }
+            // 切換分頁時，記住「當前專案」
+            isSyncLocked = true;
+            currentProject = name;
+            localStorage.setItem('isoCurrentProject', name); // ✅ 新增這行：把專案名稱存進瀏覽器
+             document.getElementById('b_caseName').value = name;
+            
             if (btnElement) { btnElement.innerText = "📂 下載並開啟專案"; btnElement.disabled = false; btnElement.style.background = "#1565c0"; }
         } catch(fatalErr) {
             isSyncLocked = false; showToast("❌ 系統嚴重錯誤：" + fatalErr.message, "error");
@@ -905,15 +911,20 @@ async function executeFinishCase() {
             if (pageId === 'page-briefing') document.getElementById('nav-briefing').classList.add('active');
             if (pageId === 'page-medic') document.getElementById('nav-medic').classList.add('active');
         }
-        if(pageId === 'page-medic') renderMedicList(); scrollToTop(); 
+        if(pageId === 'page-medic') renderMedicList(); 
+        // 記住最後停留的子畫面加在這裡
+        localStorage.setItem('isoLastTab', pageId);
+        scrollToTop(); 
     }
     
-    function goHome() { 
-        currentProject = null; 
-        clearInterval(window.autoSyncInterval); 
-        applyReadOnly(false); /* 加入這行：回首頁時全面解除輸入框鎖定 */
-        renderHome(); 
-        switchTab('page-home'); 
+    function goHome() {
+        currentProject = null;
+        localStorage.removeItem('isoCurrentProject'); // ✅ 新增這行：主動回首頁時，清除專案記憶
+        clearInterval(window.autoSyncInterval);
+        applyReadOnly(false);
+        /* 加入這行：回首頁時全面解除輸入框鎖定 */
+        renderHome();
+        switchTab('page-home');
     }
 
     async function renderHome() {
@@ -1017,7 +1028,34 @@ function renderLocalHomeFallback() {
         ['time','e','d','i','c'].forEach(f => { const el = document.getElementById(`med_${f.charAt(0)}_${index}`); if(el) db[currentProject].medic[index][f] = el.value; }); saveDB();
     }
 
-    initSelects(); renderHome();
+   initSelects();
+
+// === 🚀 網頁重整 / 休眠喚醒的自動還原機制 ===
+const savedUserName = localStorage.getItem('isoUserName');
+const savedProject = localStorage.getItem('isoCurrentProject');
+const savedTab = localStorage.getItem('isoLastTab') || 'page-briefing';
+
+// 1. 自動填入操作人員姓名
+if (savedUserName) {
+    const modInput = document.getElementById('modifierName');
+    if (modInput) modInput.value = savedUserName;
+    currentModifier = savedUserName;
+}
+
+// 2. 判斷是否有尚未離開的專案
+if (savedProject && savedUserName && db[savedProject]) {
+    // 發現記憶！直接在背景自動載入專案，跳過首頁
+    openProject(savedProject, 'edit', null, true).then(() => {
+        // 載入完成後，切換回休眠前所在的子分頁 (簡報表或MEDIC)
+        if (savedTab !== 'page-briefing') {
+            switchTab(savedTab);
+        }
+    });
+} else {
+    // 沒有記憶，才正常顯示首頁列表
+    renderHome();
+}
+// ===========================================
 </script>
 </body>
 </html>
