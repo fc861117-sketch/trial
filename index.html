@@ -695,6 +695,7 @@ async function executeFinishCase() {
                     return; 
                 }
                 currentModifier = modName;
+                localStorage.setItem('isoUserName', modName); // 把名字存起來
             }
 
             // 按下按鈕後顯示讀取中，並鎖定同群組的按鈕
